@@ -367,7 +367,7 @@ else
     if [ ! -d "$CLONE_PATH/.git" ]; then
         progress "Cloning the repository from $REPO_URL..."
         info "This may take a few minutes depending on your connection..."
-        git clone --recursive "$REPO_URL" "$CLONE_PATH"
+        git clone --recursive -b "$BRANCH_NAME" "$REPO_URL" "$CLONE_PATH"
         success "Repository cloned successfully!"
     else
         info "Repository already exists at $CLONE_PATH."
@@ -633,10 +633,10 @@ select PLATFORM in "${PLATFORM_CHOICES[@]}" "Exit"; do
 
         cd "$CLONE_PATH" || exit
 
-        progress "Running: make px4_sitl_default $PLATFORM"
+        progress "Running: make px4_sitl "$PLATFORM""
         echo ""
 
-        if make px4_sitl_default "$PLATFORM"; then
+        if make px4_sitl "$PLATFORM"; then
             success "Build completed successfully!"
         else
             warning "Build completed with errors. Check the output above."
