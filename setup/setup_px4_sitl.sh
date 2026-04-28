@@ -143,11 +143,11 @@ fi
 # === Check for Custom Installation Directory Parameter ===
 if [ -n "$1" ]; then
     INSTALL_PATH="$1"
-    CLONE_PATH="$INSTALL_PATH/PX4-Autopilot-Me"
+    CLONE_PATH="$INSTALL_PATH"
     CONFIG_FILE="$INSTALL_PATH/.px4sitl_config"
 else
     INSTALL_PATH="$DEFAULT_CLONE_PATH"
-    CLONE_PATH="$INSTALL_PATH/PX4-Autopilot-Me"
+    CLONE_PATH="$INSTALL_PATH"
     CONFIG_FILE="$DEFAULT_CONFIG_FILE"
 fi
 
