@@ -87,7 +87,7 @@
 
 # === Configurable Variables ===
 REPO_URL="https://github.com/gnmelnr/px4xplane.git"
-BRANCH_NAME="v1.16.2-xplane"
+BRANCH_NAME="master"
 UPSTREAM_URL="https://github.com/PX4/PX4-Autopilot.git"
 DEFAULT_CLONE_PATH="$HOME/PX4-Autopilot-v1.16.2-xplane"
 DEFAULT_CONFIG_FILE="$HOME/.px4sitl_config"
