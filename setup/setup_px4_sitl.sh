@@ -74,6 +74,7 @@
 # - xplane_ehang184: Ehang 184 (quadcopter airtaxi)
 # - xplane_alia250: Alia-250 (eVTOL quadplane)
 # - xplane_qtailsitter: Quantix (quad tailsitter VTOL)
+# - xplane_l250: L250 (Linear eVTOL Cargo)
 #
 # === Future ===
 # Once the PR is merged into the official PX4 repository, this script will be updated
