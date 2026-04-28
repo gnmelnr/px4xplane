@@ -121,10 +121,10 @@ if [[ "$1" == "$UNINSTALL_FLAG" ]]; then
         echo "Global command not found."
     fi
 
-    # Attempt to remove PX4-Autopilot-Me directory and config file
-    if [ -d "$DEFAULT_CLONE_PATH/PX4-Autopilot-Me" ]; then
-        sudo rm -rf "$DEFAULT_CLONE_PATH/PX4-Autopilot-Me"
-        echo "Removed PX4-Autopilot-Me Cloned Repository."
+    # Attempt to remove PX4-Autopilot v1.16.2 X-Plane directory and config file
+    if [ -d "$DEFAULT_CLONE_PATH" ]; then
+        sudo rm -rf "$DEFAULT_CLONE_PATH"
+        echo "Removed PX4-Autopilot v1.16.2 X-Plane cloned repository."
     fi
     if [ -e "$DEFAULT_CONFIG_FILE" ]; then
         rm "$DEFAULT_CONFIG_FILE"
@@ -367,7 +367,7 @@ else
     if [ ! -d "$CLONE_PATH/.git" ]; then
         progress "Cloning the repository from $REPO_URL..."
         info "This may take a few minutes depending on your connection..."
-        git clone --recursive -b "$BRANCH_NAME" "$REPO_URL" "$CLONE_PATH"
+        git clone --recursive "$REPO_URL" "$CLONE_PATH"
         success "Repository cloned successfully!"
     else
         info "Repository already exists at $CLONE_PATH."
@@ -393,12 +393,6 @@ else
     git fetch upstream --quiet
     git fetch upstream --tags --quiet
     success "Upstream repository configured."
-
-    # If tag issue persists, create a missing tag manually
-    if ! git tag | grep -q "v1.14.0-dev"; then
-        info "Creating missing tag v1.14.0-dev..."
-        git tag v1.14.0-dev
-    fi
 
     # === Run the ubuntu.sh Script ===
     highlight "Installing PX4 dependencies..."
@@ -633,10 +627,10 @@ select PLATFORM in "${PLATFORM_CHOICES[@]}" "Exit"; do
 
         cd "$CLONE_PATH" || exit
 
-        progress "Running: make px4_sitl "$PLATFORM""
+        progress "Running: make px4_sitl_default $PLATFORM"
         echo ""
 
-        if make px4_sitl "$PLATFORM"; then
+        if make px4_sitl_default "$PLATFORM"; then
             success "Build completed successfully!"
         else
             warning "Build completed with errors. Check the output above."
