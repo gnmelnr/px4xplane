@@ -86,7 +86,7 @@
 # - Official PX4: https://github.com/PX4/PX4-Autopilot
 
 # === Configurable Variables ===
-REPO_URL="https://github.com/gnmelnr/PX4-Autopilot.git"
+REPO_URL="https://github.com/gnmelnr/px4xplane.git"
 BRANCH_NAME="v1.16.2-xplane"
 UPSTREAM_URL="https://github.com/PX4/PX4-Autopilot.git"
 DEFAULT_CLONE_PATH="$HOME/PX4-Autopilot-v1.16.2-xplane"
@@ -121,9 +121,9 @@ if [[ "$1" == "$UNINSTALL_FLAG" ]]; then
         echo "Global command not found."
     fi
 
-    # Attempt to remove PX4-Autopilot v1.16.2 X-Plane directory and config file
+    # Attempt to remove PX4 clone directory and config file
     if [ -d "$DEFAULT_CLONE_PATH" ]; then
-        sudo rm -rf "$DEFAULT_CLONE_PATH"
+        rm -rf "$DEFAULT_CLONE_PATH"
         echo "Removed PX4-Autopilot v1.16.2 X-Plane cloned repository."
     fi
     if [ -e "$DEFAULT_CONFIG_FILE" ]; then
@@ -251,6 +251,14 @@ if ! command -v git &> /dev/null; then
 fi
 success "Git found."
 
+# Warn early if the user cannot use sudo. Dependency setup requires sudo.
+if ! sudo -v; then
+    warning "This user does not have sudo access. Add the user to sudoers before continuing."
+    warning "From Windows PowerShell: wsl -u root"
+    warning "Then inside WSL: usermod -aG sudo $(whoami)"
+    exit 1
+fi
+
 # === Simplified Process for Subsequent Runs ===
 if [ -d "$CLONE_PATH" ] && [ -f "$CONFIG_FILE" ] && [ "$REPAIR_MODE" = false ]; then
     info "Detected existing installation at: $CLONE_PATH"
@@ -364,20 +372,44 @@ else
     fi
 
     # === Clone the Repository ===
+    if [ -d "$CLONE_PATH" ] && [ ! -d "$CLONE_PATH/.git" ]; then
+        warning "Found existing non-git folder at: $CLONE_PATH"
+        if [ "$REPAIR_MODE" = true ]; then
+            warning "Repair mode enabled: removing corrupted/incomplete folder..."
+            rm -rf "$CLONE_PATH"
+        else
+            warning "Remove it or re-run with --repair."
+            exit 1
+        fi
+    fi
+
     if [ ! -d "$CLONE_PATH/.git" ]; then
         progress "Cloning the repository from $REPO_URL..."
         info "This may take a few minutes depending on your connection..."
-        git clone --recursive "$REPO_URL" "$CLONE_PATH"
-        success "Repository cloned successfully!"
+        if git clone --recursive "$REPO_URL" "$CLONE_PATH"; then
+            success "Repository cloned successfully!"
+        else
+            warning "Failed to clone repository. Aborting."
+            exit 1
+        fi
     else
         info "Repository already exists at $CLONE_PATH."
     fi
 
-    cd "$CLONE_PATH" || exit
+    cd "$CLONE_PATH" || exit 1
+
+    if [ ! -d ".git" ]; then
+        warning "PX4 repository was not cloned correctly. Aborting."
+        exit 1
+    fi
 
     progress "Checking out branch: $BRANCH_NAME..."
-    git checkout "$BRANCH_NAME"
-    success "Switched to branch: $BRANCH_NAME"
+    if git checkout "$BRANCH_NAME"; then
+        success "Switched to branch: $BRANCH_NAME"
+    else
+        warning "Failed to checkout branch: $BRANCH_NAME"
+        exit 1
+    fi
 
     # === Add Upstream and Fetch Tags ===
     progress "Adding upstream repository and fetching tags..."
@@ -627,10 +659,10 @@ select PLATFORM in "${PLATFORM_CHOICES[@]}" "Exit"; do
 
         cd "$CLONE_PATH" || exit
 
-        progress "Running: make px4_sitl_default $PLATFORM"
+        progress "Running: make px4_sitl $PLATFORM"
         echo ""
 
-        if make px4_sitl_default "$PLATFORM"; then
+        if make px4_sitl "$PLATFORM"; then
             success "Build completed successfully!"
         else
             warning "Build completed with errors. Check the output above."
